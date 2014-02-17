@@ -473,5 +473,10 @@ static BOOL containsString(NSString *haystack, NSString *needle)
     return YES;
 }
 
+- (BOOL) resignFirstResponder
+{
+    return [_textField resignFirstResponder];
+}
+
 @end
 
