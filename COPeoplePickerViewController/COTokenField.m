@@ -99,7 +99,7 @@ static NSString *kCOTokenFieldDetectorString = @"\u200B";
     
     UILabel *hintLabel = [[UILabel alloc] initWithFrame:CGRectZero];
     hintLabel.font = self.textField.font;
-    hintLabel.textColor = [UIColor grayColor];
+    hintLabel.textColor = [UIColor colorWithWhite: 0.70 alpha:1];
     
     self.hintLabel = hintLabel;
     [self addSubview:hintLabel];
