@@ -26,6 +26,18 @@ const CGFloat kTokenFieldShadowHeight = 14.0;
     BOOL _compactMode;
 }
 
+@property (nonatomic, weak) IBOutlet id<COTokenFieldDelegate> tokenFieldDelegate;
+@property (nonatomic, strong) UITextField *textField;
+@property (nonatomic, strong) UILabel *hintLabel;
+
+@property (nonatomic, strong) UIButton *addContactButton;
+@property (nonatomic, strong) NSMutableArray *tokens;
+@property (nonatomic, strong) COToken *selectedToken;
+@property (nonatomic, readonly) CGFloat computedRowHeight;
+@property (nonatomic, readonly) NSString *textWithoutDetector;
+
+- (void)tokenInputChanged:(id)sender;
+
 @end
 
 @implementation COTokenField
@@ -476,6 +488,11 @@ static BOOL containsString(NSString *haystack, NSString *needle)
 - (BOOL) resignFirstResponder
 {
     return [_textField resignFirstResponder];
+}
+
+- (BOOL) isFirstResponder
+{
+    return [_textField isFirstResponder];
 }
 
 @end

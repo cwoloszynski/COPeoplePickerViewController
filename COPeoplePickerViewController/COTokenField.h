@@ -55,15 +55,8 @@ extern const CGFloat kTokenFieldShadowHeight;
 
 
 @interface COTokenField : UIView <UITextFieldDelegate>
-@property (nonatomic, weak) IBOutlet id<COTokenFieldDelegate> tokenFieldDelegate;
-@property (nonatomic, strong) UITextField *textField;
-@property (nonatomic, strong) UILabel *hintLabel;
+
 @property (nonatomic, strong) NSString *hint;
-@property (nonatomic, strong) UIButton *addContactButton;
-@property (nonatomic, strong) NSMutableArray *tokens;
-@property (nonatomic, strong) COToken *selectedToken;
-@property (nonatomic, readonly) CGFloat computedRowHeight;
-@property (nonatomic, readonly) NSString *textWithoutDetector;
 
 - (CGFloat)heightForNumberOfRows:(NSUInteger)rows;
 - (void)selectToken:(COToken *)token;
@@ -72,6 +65,5 @@ extern const CGFloat kTokenFieldShadowHeight;
 - (void)modifyToken:(COToken *)token;
 - (void)modifySelectedToken;
 - (void)processTokenWithEmailAddress:(NSString *) emailAddress contactName:(NSString *)contactName  associatedRecord:(ABContact *)record;
-- (void)tokenInputChanged:(id)sender;
 
 @end
