@@ -189,33 +189,55 @@ static NSString *kCOTokenFieldDetectorString = @"\u200B";
         [token removeFromSuperview];
     }
     
-    NSMutableString * names = [[NSMutableString alloc] init];
+    NSMutableString * baseNameList = [[NSMutableString alloc] init];
     NSString * displayText;
     BOOL insertComma = NO;
     NSInteger nameCount = [self.tokens count];
     
+    // When fitting a list of names, you must compute the final form to decide if it fits.
+    // So, for each name, we always keep an alternate that is known to fit (bestList).
+    
+    NSString * bestList = [NSString stringWithFormat:@"%d attendee%@", [self.tokens count], [self.tokens count] > 1 ? @"s" : @""];
+    
     for (COToken * token in self.tokens) {
+        //
+        // Compute baseNameList
         NSString * separationString = insertComma ? @", " : @"";
-        NSString * previousNames = [names copy];
-        [names appendFormat:@"%@%@", separationString, [token displayString]];
+        [baseNameList appendFormat:@"%@%@", separationString, [token displayString]];
+        --nameCount;
+        // Compute display Name if we include the baseNameList
+        
+        if (nameCount == 0) displayText = baseNameList;
+        else if (nameCount == 1) displayText = [NSString stringWithFormat:@"%@ and 1 other", baseNameList];
+        else displayText = [NSString stringWithFormat:@"%@ and %d others", baseNameList, nameCount];
+        
         //
         // Make sure this the name is not too long
         //
-        _textField.text = names;
+        _textField.text = displayText;
         [_textField sizeToFit];
         
-        if ((_textField.frame.size.height > 44) || (_textField.frame.size.width > 150)) {
-            if (nameCount == 1) displayText = [previousNames stringByAppendingString:@", and 1 other"];
-            else displayText = [previousNames stringByAppendingFormat:@", and %d others", nameCount];
-            break;
+        if ((_textField.frame.size.height <= 44) && (_textField.frame.size.width < 300)) {
+            // This is a good option, cache it
+            // DDLogInfo(@"good fit:  \"%@\" (%f, %f)", _textField.text, _textField.frame.size.width, _textField.frame.size.height);
+            bestList = [_textField.text copy];
         }
         insertComma = YES;
-        --nameCount;
-        displayText = names;
+
     }
+    _textField.text = bestList;
+    [_textField sizeToFit];
     
     // adjust the text field frame
-    CGFloat left = self.hintLabel.frame.size.width + self.hintLabel.frame.origin.x;
+    CGFloat left = self.hintLabel.frame.origin.x;
+    if([self.tokens count] == 0) {
+        self.hintLabel.hidden = NO;
+        _textField.hidden = YES;
+    } else {
+        self.hintLabel.hidden = YES;
+        _textField.hidden = NO;
+    }
+    // left = self.hintLabel.frame.size.width + self.hintLabel.frame.origin.x;
     CGRect textFieldFrame = self.textField.frame;
     
     textFieldFrame.origin.x = left;
@@ -224,9 +246,7 @@ static NSString *kCOTokenFieldDetectorString = @"\u200B";
     textFieldFrame.size = CGSizeMake(self.frame.size.width - left,
                                      self.computedRowHeight);
     
-    _textField.text = displayText;
     _textField.frame = textFieldFrame;
-    _textField.hidden = NO;
     
     CGRect frame = self.frame;
     frame.size.height = textFieldFrame.size.height + 1.5*kTokenFieldPaddingY;
@@ -240,7 +260,16 @@ static NSString *kCOTokenFieldDetectorString = @"\u200B";
     NSUInteger row = 0;
     
     // span of the free space in the last row
-    CGFloat left = self.hintLabel.frame.size.width + self.hintLabel.frame.origin.x;
+    CGFloat left = 0.0;
+    //left = self.hintLabel.frame.size.width + self.hintLabel.frame.origin.x;
+    
+    if ([self.tokens count] == 0) {
+        self.hintLabel.hidden = NO;
+        left = self.hintLabel.frame.size.width + self.hintLabel.frame.origin.x;
+    } else {
+        self.hintLabel.hidden = YES;
+        left = self.hintLabel.frame.origin.x;
+    }
     CGFloat right = self.frame.size.width - CGRectGetWidth(self.addContactButton.frame) - 2*kTokenFieldPaddingX;
     
     CGFloat rowHeight = self.computedRowHeight;
@@ -474,6 +503,10 @@ static BOOL containsString(NSString *haystack, NSString *needle)
 {
     _compactMode = NO;
     _textField.text = kCOTokenFieldDetectorString;
+
+    // Clear all selected tokens when gaining focus
+    for (COToken *t in self.tokens) t.selected = NO;
+
     [self setNeedsLayout];
     return YES;
 }
